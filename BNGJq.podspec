@@ -17,20 +17,22 @@ Pod::Spec.new do |s|
                        * Markdown format.
                        * Don't worry about the indent, we strip it!
                        DESC
-  s.homepage         = "https://github.com/<GITHUB_USERNAME>/BNGJq"
-  # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
+  s.homepage         = "https://github.com/bongole/BNGJq"
   s.license          = 'MIT'
   s.author           = { "bongole" => "bongole2@gmail.com" }
-  s.source           = { :git => "https://github.com/<GITHUB_USERNAME>/BNGJq.git", :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.source           = { :git => "https://github.com/bongole/BNGJq.git", :tag => s.version.to_s }
+  s.social_media_url = 'https://twitter.com/bongole'
 
   s.platform     = :ios, '7.0'
   s.requires_arc = true
 
   s.source_files = 'Pod/Classes'
-  s.resources = 'Pod/Assets/*.png'
+  s.vendored_libraries = 'Submodules/jq/build/ios/*.a'
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+  s.prepare_command = <<-CMD
+     git submodule update --init --recursive
+     cd Submodules/jq/ && ./compile-ios.sh
+  CMD
+
+  s.public_header_files = 'Pod/Classes/**/*.h', 'Submodules/jq/build/ios/{jq,jv}.h'
 end
