@@ -14,5 +14,6 @@
 
 - (bool)search:(NSString*)pattern block:(void (^)(id))iteratorBlock;
 - (id)initWithJSONString:(NSString *)src;
+- (id)initWithJSONData:(NSData *)src;
 
 @end
