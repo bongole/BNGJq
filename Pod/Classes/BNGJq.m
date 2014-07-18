@@ -16,14 +16,23 @@ static void jq_err_func(void *p, jv msg){
 }
 
 @interface BNGJq()
-@property NSString *src;
+@property NSData *src;
 @end
 
-#define BUFSIZE 4096
+#define BUFSIZE 1024
 
 @implementation BNGJq
 
 - (id)initWithJSONString:(NSString *)src
+{
+    self = [super init];
+    _src = [src dataUsingEncoding:NSUTF8StringEncoding];
+    _error = nil;
+    
+    return self;
+}
+
+- (id)initWithJSONData:(NSData *)src
 {
     self = [super init];
     _src = src;
@@ -53,15 +62,16 @@ static void jq_err_func(void *p, jv msg){
     
     struct jv_parser *parser = jv_parser_new(0);
     
-    NSInputStream *is = [[NSInputStream alloc] initWithData:[_src dataUsingEncoding:NSUTF8StringEncoding]];
+    NSInputStream *is = [[NSInputStream alloc] initWithData:_src];
     [is open];
+    
     uint8_t buf[BUFSIZE];
-    for ( int read_count = [is read:buf maxLength:BUFSIZE];
+    for ( NSInteger read_count = [is read:buf maxLength:BUFSIZE];
          0 < read_count;
          read_count = [is read:buf maxLength:BUFSIZE]
          ){
         
-        jv_parser_set_buf(parser, (const char*)buf, read_count, 1);
+        jv_parser_set_buf(parser, (const char*)buf, (int)read_count, 1);
         jv value;
         for (value = jv_parser_next(parser);
              jv_is_valid(value);
