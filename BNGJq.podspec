@@ -27,6 +27,7 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.source_files = 'Pod/Classes'
+  s.public_header_files = 'Pod/Classes/**/*.h', 'Submodules/jq/{jq,jv}.h'
   s.vendored_libraries = 'Submodules/jq/build/ios/*.a'
 
   s.prepare_command = <<-CMD
@@ -34,5 +35,4 @@ Pod::Spec.new do |s|
      cd Submodules/jq/ && ./compile-ios.sh
   CMD
 
-  s.public_header_files = 'Pod/Classes/**/*.h', 'Submodules/jq/build/ios/{jq,jv}.h'
 end
