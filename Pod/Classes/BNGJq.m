@@ -95,6 +95,7 @@ static void jq_err_func(void *p, jv msg){
             jv msg = jv_invalid_get_msg(value);
             self.error = [[NSString alloc] initWithCString:jv_string_value(msg) encoding:NSUTF8StringEncoding];
             jv_free(msg);
+            break;
         }
         else{
             jv_free(value);
