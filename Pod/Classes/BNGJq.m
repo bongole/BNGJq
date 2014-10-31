@@ -62,46 +62,34 @@ static void jq_err_func(void *p, jv msg){
     
     struct jv_parser *parser = jv_parser_new(0);
     
-    NSInputStream *is = [[NSInputStream alloc] initWithData:_src];
-    [is open];
-    
-    uint8_t buf[BUFSIZE];
-    for ( NSInteger read_count = [is read:buf maxLength:BUFSIZE];
-         0 < read_count;
-         read_count = [is read:buf maxLength:BUFSIZE]
+    jv_parser_set_buf(parser, (const char*)[_src bytes], (int)[_src length], 0);
+    jv value;
+    for (value = jv_parser_next(parser);
+         jv_is_valid(value);
+         value = jv_parser_next(parser)
          ){
         
-        jv_parser_set_buf(parser, (const char*)buf, (int)read_count, 1);
-        jv value;
-        for (value = jv_parser_next(parser);
-             jv_is_valid(value);
-             value = jv_parser_next(parser)
-             ){
-            
-            jq_start(jq_state, value, 0);
-            jv result;
-            for (result = jq_next(jq_state);
-                 jv_is_valid(result);
-                 result = jq_next(jq_state)) {
-                jv dumped = jv_dump_string(result, 0);
-                NSString *r = [[NSString alloc] initWithCString:jv_string_value(dumped) encoding:NSUTF8StringEncoding];
-                iteratorBlock([self toJSON:r]);
-            }
-            
-            jv_free(result);
+        jq_start(jq_state, value, 0);
+        jv result;
+        for (result = jq_next(jq_state);
+             jv_is_valid(result);
+             result = jq_next(jq_state)) {
+            jv dumped = jv_dump_string(result, 0);
+            NSString *r = [[NSString alloc] initWithCString:jv_string_value(dumped) encoding:NSUTF8StringEncoding];
+            iteratorBlock([self toJSON:r]);
         }
         
-        if( jv_invalid_has_msg(jv_copy(value)) ){
-            jv msg = jv_invalid_get_msg(value);
-            self.error = [[NSString alloc] initWithCString:jv_string_value(msg) encoding:NSUTF8StringEncoding];
-            jv_free(msg);
-            break;
-        }
-        else{
-            jv_free(value);
-        }
+        jv_free(result);
     }
-    [is close];
+    
+    if( jv_invalid_has_msg(jv_copy(value)) ){
+        jv msg = jv_invalid_get_msg(value);
+        self.error = [[NSString alloc] initWithCString:jv_string_value(msg) encoding:NSUTF8StringEncoding];
+        jv_free(msg);
+    }
+    else{
+        jv_free(value);
+    }
     
     if( self.error != nil ){
         return NO;
